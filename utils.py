@@ -459,45 +459,6 @@ def humanbytes(size):
         n += 1
     return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
 
-async def check_token(bot, userid, token):
-    user = await bot.get_users(userid)
-    if not await db.is_user_exist(user.id):
-        await db.add_user(user.id, user.first_name)
-        await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
-    if user.id in TOKENS.keys():
-        TKN = TOKENS[user.id]
-        if token in TKN.keys():
-            is_used = TKN[token]
-            if is_used == True:
-                return False
-            else:
-                return True
-    else:
-        return False
-
-async def get_token(bot, userid, link, fileid):
-    user = await bot.get_users(userid)
-    if not await db.is_user_exist(user.id):
-        await db.add_user(user.id, user.first_name)
-        await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
-    token = ''.join(random.choices(string.ascii_letters + string.digits, k=7))
-    TOKENS[user.id] = {token: False}
-    url = f"{link}verify-{user.id}-{token}-{fileid}"
-    status = await get_verify_status(user.id)
-    date_var = status["date"]
-    time_var = status["time"]
-    hour, minute, second = time_var.split(":")
-    year, month, day = date_var.split("-")
-    last_date, last_time = str((datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute), second=int(second)))-timedelta(hours=12)).split(" ")
-    tz = pytz.timezone('Asia/Kolkata')
-    curr_date, curr_time = str(datetime.now(tz)).split(" ")
-    if last_date == curr_date:
-        vr_num = 2
-    else:
-        vr_num = 1
-    shortened_verify_url = await get_verify_shorted_link(vr_num, url)
-    return str(shortened_verify_url)
-
 async def send_all(bot, userid, files, ident):
     if (AUTH_CHANNEL or REQ_CHANNEL) and not await is_subscribed(bot=bot, userid=userid):
         try:
